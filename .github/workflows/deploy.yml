@@ -18,7 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2
+          fetch-depth: 0  # Fetch all history for accurate git diff
 
       - name: Set up Environment
         id: set-env
@@ -56,7 +56,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Set up AWS CLI for Account 1
         uses: aws-actions/configure-aws-credentials@v1
@@ -83,7 +83,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Set up AWS CLI for Account 2
         uses: aws-actions/configure-aws-credentials@v1
@@ -94,7 +94,11 @@ jobs:
 
       - name: Deploy CloudFormation stack for Account 2
         run: |
-          PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
+          if [ -f account-2/parameters.json ]; then
+            PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
+          else
+            PARAMS=""
+          fi
           echo "Deploying stack for Account 2 with parameters: ${PARAMS}"
           aws cloudformation deploy \
             --template-file account-2/main-template.yaml \
