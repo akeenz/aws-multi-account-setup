@@ -1,8 +1,8 @@
-  {
+{
     "Parameters": {
       "VpcCidr": "10.0.0.0/16",
       "PublicSubnetCidr": "10.0.1.0/24",
-      "BucketName": "my-s3-bucket"
+      "BucketName": "my-akin-s3-bucket"
     }
   }
   
