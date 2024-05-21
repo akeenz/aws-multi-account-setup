@@ -37,19 +37,6 @@ jobs:
     # - name: Debug - Show changed files output
     #   run: echo "Changed files: ${{ env.changed-files }}"
 
-    - name: Read parameters for Account 1
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') }}
-      id: read_params_1
-      run: |
-        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-1/parameters.json)
-        echo "params=${PARAMS}" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Debug - Show params for Account 1
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') }}
-      run: echo "Params for Account 1: ${{ env.params }}"
-      shell: bash
-
     - name: Set up AWS CLI for Account 1
       if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') }}
       uses: aws-actions/configure-aws-credentials@v1
@@ -61,24 +48,12 @@ jobs:
     - name: Deploy CloudFormation stack for Account 1
       if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') }}
       run: |
-        echo "Deploying stack for Account 1"
+        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-1/parameters.json)
+        echo "Deploying stack for Account 1 with parameters: ${PARAMS}"
         aws cloudformation deploy \
           --template-file account-1/main-template.yaml \
           --stack-name my-stack-account-1 \
-          --parameter-overrides ${{ env.params }}
-      shell: bash
-
-    - name: Read parameters for Account 2
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') }}
-      id: read_params_2
-      run: |
-        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
-        echo "params=${PARAMS}" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Debug - Show params for Account 2
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') }}
-      run: echo "Params for Account 2: ${{ env.params }}"
+          --parameter-overrides ${PARAMS}
       shell: bash
 
     - name: Set up AWS CLI for Account 2
@@ -92,9 +67,10 @@ jobs:
     - name: Deploy CloudFormation stack for Account 2
       if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') }}
       run: |
-        echo "Deploying stack for Account 2"
+        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
+        echo "Deploying stack for Account 2 with parameters: ${PARAMS}"
         aws cloudformation deploy \
           --template-file account-2/main-template.yaml \
           --stack-name my-stack-account-2 \
-          --parameter-overrides ${{ env.params }}
+          --parameter-overrides ${PARAMS}
       shell: bash
