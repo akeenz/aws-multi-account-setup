@@ -33,8 +33,8 @@ jobs:
           echo "::set-output name=changed-files::$CHANGED_FILES"
         fi
 
-    - name: Debug - Show changed files output
-      run: echo "Changed files: ${{ steps.changes.outputs['changed-files'] }}"
+    # - name: Debug - Show changed files output
+    #   run: echo "Changed files: ${{ steps.changes.outputs['changed-files'] }}"
 
     - name: Set up AWS CLI for Account 1
       if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
