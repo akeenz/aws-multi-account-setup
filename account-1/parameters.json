@@ -1,6 +1,9 @@
 {
-    "VpcCidr": "10.0.0.0/16",
-    "PublicSubnetCidr": "10.0.1.0/24",
-    "BucketName": "my-bukcet-accout-1"
+    "Parameters": {
+        "VpcCidr": "10.0.0.0/16",
+        "PublicSubnetCidr": "10.0.1.0/24",
+        "BucketName": "my-bukcet-accout-1"
+    
+    }
   }
   
