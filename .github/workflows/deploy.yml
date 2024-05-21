@@ -34,8 +34,8 @@ jobs:
         fi
       shell: bash
 
-    - name: Debug - Show changed files output
-      run: echo "Changed files: ${{ env.changed-files }}"
+    # - name: Debug - Show changed files output
+    #   run: echo "Changed files: ${{ env.changed-files }}"
 
     - name: Read parameters for Account 1
       if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') }}
