@@ -1,6 +1,6 @@
 {
     "VpcCidr": "10.0.0.0/16",
     "PublicSubnetCidr": "10.0.1.0/24",
-    "BucketName": "my-bucet-account-1"
+    "BucketName": "my-bucet-accout-1"
   }
   

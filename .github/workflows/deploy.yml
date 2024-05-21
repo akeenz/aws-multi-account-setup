@@ -17,7 +17,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        fetch-depth: 0  # Fetch all history for git diff
+        fetch-depth: 2  # Fetch enough history to compare changes
 
     - name: Determine modified files
       id: changes
@@ -27,7 +27,6 @@ jobs:
           echo "First push detected, deploying to both accounts."
           echo "::set-output name=changed-files::ALL"
         else
-          git fetch origin main  # Ensure we have all history
           CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           echo "Changed files:"
           echo "$CHANGED_FILES"
@@ -35,10 +34,10 @@ jobs:
         fi
 
     - name: Debug - Show changed files output
-      run: echo "Changed files: ${{ steps.changes.outputs.changed-files }}"
+      run: echo "Changed files: ${{ steps.changes.outputs['changed-files'] }}"
 
     - name: Set up AWS CLI for Account 1
-      if: ${{ steps.changes.outputs.changed-files == 'ALL' || contains(steps.changes.outputs.changed-files, 'account-1/') || contains(steps.changes.outputs.changed-files, 'modules/') }}
+      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_1 }}
@@ -46,7 +45,7 @@ jobs:
         aws-region: us-east-1
 
     - name: Deploy CloudFormation stack for Account 1
-      if: ${{ steps.changes.outputs.changed-files == 'ALL' || contains(steps.changes.outputs.changed-files, 'account-1/') || contains(steps.changes.outputs.changed-files, 'modules/') }}
+      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
       run: |
         aws cloudformation deploy \
           --template-file account-1/main-template.yaml \
@@ -54,7 +53,7 @@ jobs:
           --parameter-overrides file://account-1/parameters.json
 
     - name: Set up AWS CLI for Account 2
-      if: ${{ steps.changes.outputs.changed-files == 'ALL' || contains(steps.changes.outputs.changed-files, 'account-2/') || contains(steps.changes.outputs.changed-files, 'modules/') }}
+      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-2/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_2 }}
@@ -62,7 +61,7 @@ jobs:
         aws-region: us-east-2
 
     - name: Deploy CloudFormation stack for Account 2
-      if: ${{ steps.changes.outputs.changed-files == 'ALL' || contains(steps.changes.outputs.changed-files, 'account-2/') || contains(steps.changes.outputs.changed-files, 'modules/') }}
+      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-2/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
       run: |
         aws cloudformation deploy \
           --template-file account-2/main-template.yaml \
