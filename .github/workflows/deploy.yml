@@ -7,70 +7,56 @@ on:
     paths:
       - account-1/**
       - account-2/**
-      - modules/**
 
 jobs:
-  deploy:
+  deploy-account-1:
     runs-on: ubuntu-latest
-
+    if: contains(github.event.commits.*.modified, 'account-1/') || contains(github.event.commits.*.added, 'account-1/') || contains(github.event.commits.*.removed, 'account-1/')
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 2  # Fetch enough history to compare changes
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Determine modified files
-      id: changes
-      run: |
-        echo "Checking for modified files..."
-        if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
-          echo "First push detected, deploying to both accounts."
-          echo "changed-files=ALL" >> $GITHUB_ENV
-        else
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-          echo "changed-files=${CHANGED_FILES}" >> $GITHUB_ENV
-        fi
-      shell: bash
+      - name: Set up AWS CLI for Account 1
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_1 }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_1 }}
+          aws-region: us-east-1
 
-    # - name: Debug - Show changed files output
-    #   run: echo "Changed files: ${{ env.changed-files }}"
+      - name: Deploy CloudFormation stack for Account 1
+        run: |
+          PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-1/parameters.json)
+          echo "Deploying stack for Account 1 with parameters: ${PARAMS}"
+          aws cloudformation deploy \
+            --template-file account-1/main-template.yaml \
+            --stack-name my-stack-account-1 \
+            --parameter-overrides ${PARAMS}
+        shell: bash
 
-    - name: Set up AWS CLI for Account 1
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') }}
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_1 }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_1 }}
-        aws-region: us-east-1
+  deploy-account-2:
+    runs-on: ubuntu-latest
+    if: contains(github.event.commits.*.modified, 'account-2/') || contains(github.event.commits.*.added, 'account-2/') || contains(github.event.commits.*.removed, 'account-2/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Deploy CloudFormation stack for Account 1
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') }}
-      run: |
-        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-1/parameters.json)
-        echo "Deploying stack for Account 1 with parameters: ${PARAMS}"
-        aws cloudformation deploy \
-          --template-file account-1/main-template.yaml \
-          --stack-name my-stack-account-1 \
-          --parameter-overrides ${PARAMS}
-      shell: bash
+      - name: Set up AWS CLI for Account 2
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_2 }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_2 }}
+          aws-region: us-east-2
 
-    - name: Set up AWS CLI for Account 2
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') }}
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_2 }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_2 }}
-        aws-region: us-east-2
-
-    - name: Deploy CloudFormation stack for Account 2
-      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') }}
-      run: |
-        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
-        echo "Deploying stack for Account 2 with parameters: ${PARAMS}"
-        aws cloudformation deploy \
-          --template-file account-2/main-template.yaml \
-          --stack-name my-stack-account-2 \
-          --parameter-overrides ${PARAMS}
-      shell: bash
+      - name: Deploy CloudFormation stack for Account 2
+        run: |
+          PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
+          echo "Deploying stack for Account 2 with parameters: ${PARAMS}"
+          aws cloudformation deploy \
+            --template-file account-2/main-template.yaml \
+            --stack-name my-stack-account-2 \
+            --parameter-overrides ${PARAMS}
+        shell: bash
