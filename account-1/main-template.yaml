@@ -1,11 +1,23 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Main Template for Account 1
-
+Parameters:
+  VpcCidr:
+    Description: "CIDR block for the VPC"
+    Type: String
+    # Default: "10.0.0.0/16"
+  PublicSubnetCidr:
+    Description: "CIDR block for the public subnet"
+    Type: String
+    # Default: "10.0.1.0/24"
+  BucketName:
+    Description: "CIDR block for the public subnet"
+    Type: String
+    # Default: "10.0.1.0/24"
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: ../modules/vpc/vpc-template.yaml
+      TemplateURL: https://s3.amazonaws.com/akin-ses-files/vpc-template.yaml               #../modules/vpc/vpc-template.yaml
       Parameters:
         VpcCidr: !Ref VpcCidr
         PublicSubnetCidr: !Ref PublicSubnetCidr
@@ -13,7 +25,7 @@ Resources:
   S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: ../modules/s3/s3-template.yaml
+      TemplateURL: https://s3.amazonaws.com/akin-ses-files/s3-template.yaml              #../modules/s3/s3-template.yaml
       Parameters:
         BucketName: !Ref BucketName
 

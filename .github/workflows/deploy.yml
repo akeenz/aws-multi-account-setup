@@ -65,6 +65,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_1 }}
           aws-region: us-east-1
 
+      - name: Upload CloudFormation template to S3
+        run: |
+          aws s3 cp ./modules/s3/s3-template.yaml s3://akin-ses-files/s3-template.yaml
+          aws s3 cp ./modules/vpc/vpc-template.yaml s3://akin-ses-files/vpc-template.yaml
+
       - name: Deploy CloudFormation stack for Account 1
         run: |
           PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-1/parameters.json)
