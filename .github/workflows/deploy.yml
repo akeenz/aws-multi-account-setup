@@ -1,0 +1,60 @@
+name: Deploy CloudFormation
+
+on:
+  push:
+    paths:
+      - account-1/**
+      - account-2/**
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Determine modified files
+      id: changes
+      run: |
+        echo "Checking for modified files..."
+        CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+
+        echo "Changed files:"
+        echo "$CHANGED_FILES"
+
+        echo "::set-output name=changed-files::$CHANGED_FILES"
+
+    - name: Set up AWS CLI for Account 1
+      if: contains(steps.changes.outputs.changed-files, 'account-1/')
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_1 }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_1 }}
+        aws-region: us-east-2
+
+    - name: Deploy CloudFormation stack for Account 1
+      if: contains(steps.changes.outputs.changed-files, 'account-1/')
+      run: |
+        aws cloudformation deploy \
+          --template-file account-1/main-template.yaml \
+          --stack-name my-stack-account-1 \
+          --parameter-overrides file://account-1/parameters.json
+
+    - name: Set up AWS CLI for Account 2
+      if: contains(steps.changes.outputs.changed-files, 'account-2/')
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_2 }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_2 }}
+        aws-region: us-east-1
+
+    - name: Deploy CloudFormation stack for Account 2
+      if: contains(steps.changes.outputs.changed-files, 'account-2/')
+      run: |
+        aws cloudformation deploy \
+          --template-file account-2/main-template.yaml \
+          --stack-name my-stack-account-2 \
+          --parameter-overrides file://account-2/parameters.json
