@@ -25,59 +25,59 @@ jobs:
         echo "Checking for modified files..."
         if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
           echo "First push detected, deploying to both accounts."
-          echo "::set-output name=changed-files::ALL"
+          echo "changed-files=ALL" >> $GITHUB_ENV
         else
           CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           echo "Changed files:"
           echo "$CHANGED_FILES"
-          echo "::set-output name=changed-files::$CHANGED_FILES"
+          echo "changed-files=${CHANGED_FILES}" >> $GITHUB_ENV
         fi
 
-    # - name: Debug - Show changed files output
-    #   run: echo "Changed files: ${{ steps.changes.outputs['changed-files'] }}"
+    - name: Debug - Show changed files output
+      run: echo "Changed files: ${{ env.changed-files }}"
 
     - name: Read parameters for Account 1
-      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') || contains(env.changed-files, 'modules/') }}
       id: read_params_1
       run: |
         PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-1/parameters.json)
-        echo "::set-output name=params::${PARAMS}"
+        echo "params=${PARAMS}" >> $GITHUB_ENV
 
     - name: Set up AWS CLI for Account 1
-      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') || contains(env.changed-files, 'modules/') }}
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_1 }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_1 }}
-        aws-region: us-east-1
+        aws-region: us-east-2
 
     - name: Deploy CloudFormation stack for Account 1
-      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-1/') || contains(env.changed-files, 'modules/') }}
       run: |
         aws cloudformation deploy \
           --template-file account-1/main-template.yaml \
           --stack-name my-stack-account-1 \
-          --parameter-overrides ${{ steps.read_params_1.outputs.params }}
+          --parameter-overrides ${{ env.params }}
 
     - name: Read parameters for Account 2
-      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-2/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') || contains(env.changed-files, 'modules/') }}
       id: read_params_2
       run: |
         PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
-        echo "::set-output name=params::${PARAMS}"
+        echo "params=${PARAMS}" >> $GITHUB_ENV
 
     - name: Set up AWS CLI for Account 2
-      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-2/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') || contains(env.changed-files, 'modules/') }}
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_2 }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_2 }}
-        aws-region: us-east-2
+        aws-region: us-east-1
 
     - name: Deploy CloudFormation stack for Account 2
-      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-2/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      if: ${{ env.changed-files == 'ALL' || contains(env.changed-files, 'account-2/') || contains(env.changed-files, 'modules/') }}
       run: |
         aws cloudformation deploy \
           --template-file account-2/main-template.yaml \
           --stack-name my-stack-account-2 \
-          --parameter-overrides ${{ steps.read_params_2.outputs.params }}
+          --parameter-overrides ${{ env.params }}
