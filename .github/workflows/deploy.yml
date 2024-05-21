@@ -36,6 +36,13 @@ jobs:
     # - name: Debug - Show changed files output
     #   run: echo "Changed files: ${{ steps.changes.outputs['changed-files'] }}"
 
+    - name: Read parameters for Account 1
+      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      id: read_params_1
+      run: |
+        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-1/parameters.json)
+        echo "::set-output name=params::${PARAMS}"
+
     - name: Set up AWS CLI for Account 1
       if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-1/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
       uses: aws-actions/configure-aws-credentials@v1
@@ -50,7 +57,14 @@ jobs:
         aws cloudformation deploy \
           --template-file account-1/main-template.yaml \
           --stack-name my-stack-account-1 \
-          --parameter-overrides file://account-1/parameters.json
+          --parameter-overrides ${{ steps.read_params_1.outputs.params }}
+
+    - name: Read parameters for Account 2
+      if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-2/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
+      id: read_params_2
+      run: |
+        PARAMS=$(jq -r '.Parameters | to_entries | map("\(.key)=\(.value|tostring)") | join(" ")' account-2/parameters.json)
+        echo "::set-output name=params::${PARAMS}"
 
     - name: Set up AWS CLI for Account 2
       if: ${{ steps.changes.outputs['changed-files'] == 'ALL' || contains(steps.changes.outputs['changed-files'], 'account-2/') || contains(steps.changes.outputs['changed-files'], 'modules/') }}
@@ -66,4 +80,4 @@ jobs:
         aws cloudformation deploy \
           --template-file account-2/main-template.yaml \
           --stack-name my-stack-account-2 \
-          --parameter-overrides file://account-2/parameters.json
+          --parameter-overrides ${{ steps.read_params_2.outputs.params }}
