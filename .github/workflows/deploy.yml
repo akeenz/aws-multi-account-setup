@@ -16,6 +16,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for git diff
 
     - name: Determine modified files
       id: changes
@@ -25,14 +27,15 @@ jobs:
           echo "First push detected, deploying to both accounts."
           echo "::set-output name=changed-files::ALL"
         else
+          git fetch origin main  # Ensure we have all history
           CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           echo "Changed files:"
           echo "$CHANGED_FILES"
           echo "::set-output name=changed-files::$CHANGED_FILES"
         fi
 
-    # - name: Debug - Show changed files output
-    #   run: echo "Changed files: ${{ steps.changes.outputs.changed-files }}"
+    - name: Debug - Show changed files output
+      run: echo "Changed files: ${{ steps.changes.outputs.changed-files }}"
 
     - name: Set up AWS CLI for Account 1
       if: ${{ steps.changes.outputs.changed-files == 'ALL' || contains(steps.changes.outputs.changed-files, 'account-1/') || contains(steps.changes.outputs.changed-files, 'modules/') }}
