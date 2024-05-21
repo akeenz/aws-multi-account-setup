@@ -1,5 +1,18 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Main Template for Account 2
+Parameters:
+  VpcCidr:
+    Description: "CIDR block for the VPC"
+    Type: String
+    # Default: "10.0.0.0/16"
+  PublicSubnetCidr:
+    Description: "CIDR block for the public subnet"
+    Type: String
+    # Default: "10.0.1.0/24"
+  BucketName:
+    Description: "CIDR block for the public subnet"
+    Type: String
+    # Default: "10.0.1.0/24"
 
 Resources:
   VPCStack:
@@ -19,4 +32,4 @@ Resources:
 
 
 #it is liu8393l
-#oaeiohjpoiajepoadadadijpaqejojqoejadaheihapoe[apojudhiaoh]
+#oaeiohjpoiajepoadadadiiuhiuhiuhjqoejadaheihapoe[apojudhiaoh]
