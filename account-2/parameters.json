@@ -2,7 +2,7 @@
     "Parameters": {
         "VpcCidr": "10.1.0.0/16",
         "PublicSubnetCidr": "10.1.1.0/24",
-        "BucketName": "my-bukcet-account-2"
+        "BucketName": "my-bukcet-akinomoakin-account-2"
         }
   }
   
