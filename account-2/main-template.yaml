@@ -17,7 +17,7 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: ../modules/vpc/vpc-template.yaml
+      TemplateURL: https://s3.amazonaws.com/akin-ses-files-us-east-2/vpc-template.yaml  #../modules/vpc/vpc-template.yaml
       Parameters:
         VpcCidr: !Ref VpcCidr
         PublicSubnetCidr: !Ref PublicSubnetCidr
@@ -25,7 +25,7 @@ Resources:
   S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: ../modules/s3/s3-template.yaml
+      TemplateURL: https://s3.amazonaws.com/akin-ses-files-us-east-2/s3-template.yaml  #../modules/s3/s3-template.yaml
       Parameters:
         BucketName: !Ref BucketName
 

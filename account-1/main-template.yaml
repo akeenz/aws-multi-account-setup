@@ -25,9 +25,7 @@ Resources:
   S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://raw.githubusercontent.com/akeenz/aws-multi-account-setup/main/modules/s3/s3-template.yaml    #https://s3.amazonaws.com/akin-ses-files/s3-template.yaml              #../modules/s3/s3-template.yaml
+      TemplateURL: https://s3.amazonaws.com/akin-ses-files/s3-template.yaml              #../modules/s3/s3-template.yaml
       Parameters:
         BucketName: !Ref BucketName
 
-#it is lufjk3983984kkjl
-##oakndklna;jbjbjao9hu98e]]]

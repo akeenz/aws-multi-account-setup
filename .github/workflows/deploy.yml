@@ -96,6 +96,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ACCOUNT_2 }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ACCOUNT_2 }}
           aws-region: us-east-2
+ 
+      - name: Upload CloudFormation template to S3
+        run: |
+          aws s3 cp ./modules/s3/s3-template.yaml s3://akin-ses-files-us-east-2/s3-template.yaml
+          aws s3 cp ./modules/vpc/vpc-template.yaml s3://akin-ses-files-us-east-2/vpc-template.yaml
 
       - name: Deploy CloudFormation stack for Account 2
         run: |
