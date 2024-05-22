@@ -8,7 +8,7 @@ Parameters:
   PublicSubnetCidr:
     Description: "CIDR block for the public subnet"
     Type: String
-    # Default: "10.0.1.0/24"
+    # Deflt: "10.0.1.0/24"
   BucketName:
     Description: "CIDR block for the public subnet"
     Type: String
